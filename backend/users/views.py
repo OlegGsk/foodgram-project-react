@@ -7,5 +7,5 @@ from rest_framework.pagination import PageNumberPagination
 User = get_user_model()
 
 
-class CustomUserViewSet(UserViewSet):
-    pagination_class = PageNumberPagination
+# class CustomUserViewSet(UserViewSet):
+#     pagination_class = PageNumberPagination

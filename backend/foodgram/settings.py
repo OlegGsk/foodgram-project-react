@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'api',
     'users',
+    'recipes',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -150,10 +151,10 @@ DJOSER = {
          'current_user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-            'user': ['rest_framework.permissions.AllowAny',],
-            'user_list': ['rest_framework.permissions.AllowAny',],
+            'user': ['rest_framework.permissions.AllowAny'],
+            'user_list': ['rest_framework.permissions.AllowAny'],
         },
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
-    'SET_PASSWORD_RETYPE': True
+    'SET_PASSWORD_RETYPE': False
     }
