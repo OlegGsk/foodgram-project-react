@@ -1,6 +1,8 @@
+from os import write
 from rest_framework import serializers
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredient, RecipeTag)    
+                            RecipeIngredient, RecipeTag,
+                            ShoppingCart)
 from api.extra_fields_serializers import Base64ImageField
 from users.serializers import CustomUserSerializer
 
@@ -17,31 +19,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit')
 
 
-class RecipeGetSerializer(serializers.ModelSerializer):
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True,
-        queryset=Tag.objects.all()
-    )
-    ingredients = IngredientSerializer(many=True, read_only=True)
-    image = Base64ImageField(required=False, allow_null=True)
-    author = CustomUserSerializer(read_only=True)
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'tags',
-            'author',
-            'ingredients',
-            'is_favorited',
-            'is_in_shopping_cart',
-            'name',
-            'image',
-            'text',
-            'cooking_time',)
-
-
-class RecipePostSerializer(serializers.ModelSerializer):
+class RecipeSerializer(serializers.ModelSerializer):
     tags = serializers.PrimaryKeyRelatedField(
         many=True,
         queryset=Tag.objects.all()
@@ -70,7 +48,7 @@ class RecipePostSerializer(serializers.ModelSerializer):
             RecipeIngredient.objects.create(
                 recipe=recipe, ingredient=current_ingredient)
         return recipe
-    
+
     def update(self, instance, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')

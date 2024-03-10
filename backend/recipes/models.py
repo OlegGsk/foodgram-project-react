@@ -8,6 +8,7 @@ User = get_user_model()
 class Ingredient(models.Model):
     name = models.CharField('Название', max_length=200)
     measurement_unit = models.CharField('Единица измерения', max_length=200)
+    quantity = models.PositiveSmallIntegerField('Количество', default=0)
 
     def __str__(self):
         return self.name
@@ -17,7 +18,7 @@ class Tag(models.Model):
     name = models.CharField('Название', max_length=200)
     color = models.CharField('Цвет', max_length=7)
     slug = models.SlugField('Слаг', max_length=200, unique=True)
-    
+
     class Meta:
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
@@ -76,3 +77,22 @@ class RecipeTag(models.Model):
 
     def __str__(self):
         return self.tag.name
+
+
+class ShoppingCart(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='shopping_cart')
+    quantity = models.PositiveSmallIntegerField('Количество покупок', default=0)
+    created_by = models.DateTimeField('Дата добавления', auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
+
+    class Meta:
+        verbose_name = 'Список покупок в корзине'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='unique_shopping_cart'
+            ),
+        ]

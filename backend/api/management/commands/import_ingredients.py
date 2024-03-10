@@ -20,12 +20,12 @@ class Command(BaseCommand):
                 ingredient.save()
                 if created:
                     self.stdout.write(self.style.SUCCESS(
-                        f'Ingredient {ingredient.name} created'
+                        f'Ингредиент "{ingredient.name}" добавлен'
                     ))
                 else:
                     self.stdout.write(self.style.SUCCESS(
-                        f'Ingredient {ingredient.name} updated'
+                        f'Ингредиент "{ingredient.name}" уже существует'
                     ))
         self.stdout.write(self.style.SUCCESS(
-            'Successfully Import ingredients from csv file'
+            'Импорт завершен'
         ))
