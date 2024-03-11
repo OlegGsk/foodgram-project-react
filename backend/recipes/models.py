@@ -80,9 +80,9 @@ class RecipeTag(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
-                               related_name='shopping_cart')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL,
+                               related_name='shopping_cart', null=True)
     quantity = models.PositiveSmallIntegerField('Количество покупок', default=0)
     created_by = models.DateTimeField('Дата добавления', auto_now_add=True)
 
@@ -91,8 +91,3 @@ class ShoppingCart(models.Model):
 
     class Meta:
         verbose_name = 'Список покупок в корзине'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'], name='unique_shopping_cart'
-            ),
-        ]

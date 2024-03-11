@@ -1,5 +1,6 @@
 from os import write
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 from recipes.models import (Tag, Ingredient, Recipe,
                             RecipeIngredient, RecipeTag,
                             ShoppingCart)
@@ -63,3 +64,22 @@ class RecipeSerializer(serializers.ModelSerializer):
             RecipeIngredient.objects.create(
                 recipe=instance, ingredient=current_ingredient)
         return instance
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    id = serializers.ReadOnlyField(source='recipe.id')
+    name = serializers.ReadOnlyField(source='recipe.name')
+    image = serializers.ImageField(source='recipe.image', read_only=True)
+    cooking_time = serializers.ReadOnlyField(source='recipe.cooking_time')
+
+    class Meta:
+        model = ShoppingCart
+        fields = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, data):
+        user = self.context.get('request').user
+        recipe = get_object_or_404(Recipe, pk=self.context.get('view').kwargs.get('id'))
+        if ShoppingCart.objects.filter(user=user, recipe=recipe).exists():
+            raise serializers.ValidationError(
+                'Рецепт уже добавлен в список покупок')
+        return data
