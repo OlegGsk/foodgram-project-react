@@ -1,15 +1,21 @@
 
+import csv
+
 from api.filters import RecipeFilter
+from api.permissions import IsAutehenticatedOrAuthorOrReadOnly
 from api.serializers import (IngredientSerializer, RecipeSerializer,
-                             TagSerializer, ShoppingCartSerializer)
+                             ShoppingCartSerializer, TagSerializer)
 from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from rest_framework.views import APIView
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import Ingredient, Recipe, Tag, ShoppingCart
+from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
+from recipes.models import Ingredient, Recipe, ShoppingCart, Tag
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from django.shortcuts import get_object_or_404
-from api.permissions import IsAuthorOrReadOnly
 
 User = get_user_model()
 
@@ -36,8 +42,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
     filter_backends = [DjangoFilterBackend,]
     filterset_class = RecipeFilter
-    http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = [IsAuthorOrReadOnly]
+    http_method_names = ['get', 'post', 'put', 'delete']
+    permission_classes = [IsAutehenticatedOrAuthorOrReadOnly]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -55,23 +61,31 @@ class ShoppingCartViewSet(viewsets.ModelViewSet):
         return ShoppingCart.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        recipe = get_object_or_404(Recipe, pk=self.kwargs.get('id'))
         serializer.save(user=self.request.user,
-                        recipe=recipe)
+                        recipe=self.get_recipe())
 
     def get_object(self):
-        recipe = get_object_or_404(Recipe, pk=self.kwargs.get('id'))
-        return get_object_or_404(ShoppingCart, user=self.request.user, recipe=recipe)
+        return get_object_or_404(ShoppingCart, user=self.request.user,
+                                 recipe=self.get_recipe())
+
+    def get_recipe(self):
+        return get_object_or_404(Recipe, pk=self.kwargs.get('id'))
 
 
-def download_shopping_cart(request):
-    queryset = ShoppingCart.objects.filter(user=request.user)
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = (
-        'attachment; filename="shopping_cart.csv"'
-    )
-    writer = csv.writer(response)
-    writer.writerow(['Рецепт', 'Количество'])
-    for recipe in queryset:
-        writer.writerow([recipe.recipe.name, recipe.recipe.cooking_time])
-    return response
+class DownloadShoppingCart(APIView):
+    def get(self, request):
+        recipes = ShoppingCart.objects.filter(user_id=14).values(
+            'recipe__name', 'recipe__ingredients__name', 'recipe__ingredients__measurement_unit').aaggregate(
+                sum=Sum('recipe__ingredients__amount'))
+
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="shopping_list.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Рецепт', 'Количество', 'Единицы измерения'])
+
+        for recipe in recipes:
+            writer.writerow([recipe['recipe__name'], recipe['sum'],
+                             recipe['recipe__ingredients__measurement_unit']])
+
+        return response

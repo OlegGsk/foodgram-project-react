@@ -1,8 +1,9 @@
-from os import write
+from pkg_resources import require
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
+from django.db.models import F, Sum
 from recipes.models import (Tag, Ingredient, Recipe,
-                            RecipeIngredient, RecipeTag,
+                            RecipeTag, RecipeIngredient,
                             ShoppingCart)
 from api.extra_fields_serializers import Base64ImageField
 from users.serializers import CustomUserSerializer
@@ -15,9 +16,23 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
+    amount = serializers.IntegerField(required=False,
+                                      source='recipe_ingredients__amount')
+
     class Meta:
         model = Ingredient
-        fields = ('id', 'name', 'measurement_unit')
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+        read_only_fields = ('id',)
+
+    def to_representation(self, instance):
+        amount = instance.recipe_ingredients.values('amount').last()
+        print(amount)
+        return {
+            'id': instance.id,
+            'name': instance.name,
+            'measurement_unit': instance.measurement_unit,
+            'amount': amount.get('amount')
+        }
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -28,6 +43,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = IngredientSerializer(many=True)
     image = Base64ImageField(required=False, allow_null=True)
     author = CustomUserSerializer(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -44,10 +60,12 @@ class RecipeSerializer(serializers.ModelSerializer):
         for tag in tags:
             RecipeTag.objects.create(recipe=recipe, tag=tag)
         for ingredient in ingredients:
-            current_ingredient, status = Ingredient.objects.get_or_create(
-                **ingredient)
+            amount = ingredient.get('recipe_ingredients__amount', 0)
+            print(ingredient.get('name'))
+            current_ingredient = Ingredient.objects.get(name=ingredient.get('name'))
             RecipeIngredient.objects.create(
-                recipe=recipe, ingredient=current_ingredient)
+                recipe=recipe, ingredients=current_ingredient,
+                amount=amount)
         return recipe
 
     def update(self, instance, validated_data):
@@ -59,11 +77,15 @@ class RecipeSerializer(serializers.ModelSerializer):
             RecipeTag.objects.create(recipe=instance, tag=tag)
         RecipeIngredient.objects.filter(recipe=instance).delete()
         for ingredient in ingredients:
-            current_ingredient, status = Ingredient.objects.get_or_create(
-                **ingredient)
+            current_ingredient = Ingredient.objects.get(name=ingredient.get('name'))
             RecipeIngredient.objects.create(
-                recipe=instance, ingredient=current_ingredient)
+                recipe=instance, ingredients=current_ingredient,
+                amount=ingredient.get('recipes_ingredient__amount'))
         return instance
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        return ShoppingCart.objects.filter(user=user, recipe=obj).exists()
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):

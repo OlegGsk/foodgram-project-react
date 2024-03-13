@@ -8,7 +8,6 @@ User = get_user_model()
 class Ingredient(models.Model):
     name = models.CharField('Название', max_length=200)
     measurement_unit = models.CharField('Единица измерения', max_length=200)
-    quantity = models.PositiveSmallIntegerField('Количество', default=0)
 
     def __str__(self):
         return self.name
@@ -37,7 +36,6 @@ class Recipe(models.Model):
                                verbose_name='Автор',
                                related_name='recipes')
     is_favorited = models.BooleanField('В избранное', default=False)
-    is_in_shopping_cart = models.BooleanField('В корзину', default=False)
     name = models.CharField('Название', max_length=200)
     image = models.ImageField('Картинка', upload_to='recipes/images/')
     text = models.TextField('Описание', max_length=500)
@@ -64,11 +62,12 @@ class Recipe(models.Model):
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    amount = models.PositiveSmallIntegerField('Количество', default=1)
+    ingredients = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
+                                    related_name='recipe_ingredients')
+    amount = models.PositiveSmallIntegerField('Количество', default=0)
 
     def __str__(self):
-        return self.ingredient.name
+        return self.ingredients.name
 
 
 class RecipeTag(models.Model):
@@ -80,7 +79,8 @@ class RecipeTag(models.Model):
 
 
 class ShoppingCart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='shopping_cart')
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL,
                                related_name='shopping_cart', null=True)
     quantity = models.PositiveSmallIntegerField('Количество покупок', default=0)
