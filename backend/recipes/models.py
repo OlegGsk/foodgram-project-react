@@ -1,3 +1,4 @@
+from tabnanny import verbose
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -35,7 +36,6 @@ class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                verbose_name='Автор',
                                related_name='recipes')
-    is_favorited = models.BooleanField('В избранное', default=False)
     name = models.CharField('Название', max_length=200)
     image = models.ImageField('Картинка', upload_to='recipes/images/')
     text = models.TextField('Описание', max_length=500)
@@ -83,7 +83,6 @@ class ShoppingCart(models.Model):
                              related_name='shopping_cart')
     recipe = models.ForeignKey(Recipe, on_delete=models.SET_NULL,
                                related_name='shopping_cart', null=True)
-    quantity = models.PositiveSmallIntegerField('Количество покупок', default=0)
     created_by = models.DateTimeField('Дата добавления', auto_now_add=True)
 
     def __str__(self):
@@ -91,3 +90,20 @@ class ShoppingCart(models.Model):
 
     class Meta:
         verbose_name = 'Список покупок в корзине'
+
+
+class Favorites(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='favorites',
+                             verbose_name='Пользователь')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE,
+                               related_name='favorites',
+                               verbose_name='Рецепт в избранном')
+    created_by = models.DateTimeField('Дата добавления', auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.user} {self.recipe}'
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные рецепты'
