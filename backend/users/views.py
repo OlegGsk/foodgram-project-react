@@ -12,7 +12,6 @@ User = get_user_model()
 
 
 class FollowingViewSet(UserViewSet):
-    pagination_class = LimitOffsetPagination
     permissions_class = (permissions.IsAuthenticated,)
 
     @action(detail=False, methods=['get'],
@@ -30,8 +29,15 @@ class FollowingViewSet(UserViewSet):
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=FollowSerializer)
     def subscribe(self, request, id):
+        if not User.objects.filter(id=id).exists():
+            return Response(status=status.HTTP_404_NOT_FOUND,
+                            data='Пользователь не найден')
+
         author = get_object_or_404(User, id=id)
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=request.data,
+                                         context={'request': request,
+                                                  'author': author})
+
         if request.method == 'POST':
             serializer.is_valid(raise_exception=True)
             serializer.save(user=self.request.user, author=author)

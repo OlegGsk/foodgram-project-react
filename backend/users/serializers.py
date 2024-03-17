@@ -37,7 +37,7 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         return Follow.objects.filter(user=self.context['request'].user,
-                                     author=self.context['view'].kwargs.get('id')).exists()
+                                     author=obj).exists()
 
 
 class FollowSerializer(serializers.ModelSerializer):
@@ -62,21 +62,15 @@ class FollowSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         request = self.context['request']
+        author = self.context['author']
 
-        if not User.objects.filter(id=self.context['view'].kwargs.get('id')
-                                   ).exists():
-            raise serializers.ValidationError(
-                'Пользователя с таким id не существует')
-
-        author = get_object_or_404(User,
-                                   id=self.context['view'].kwargs.get('id'))
-
-        if author == user:
-            raise serializers.ValidationError(
-                'Вы не можете подписаться на себя')
-        if Follow.objects.filter(user=user, author=author).exists():
-            raise serializers.ValidationError(
-                'Вы уже подписаны на этого пользователя')
+        if request.method == 'POST':
+            if author == user:
+                raise serializers.ValidationError(
+                    'Вы не можете подписаться на себя')
+            if Follow.objects.filter(user=user, author=author).exists():
+                raise serializers.ValidationError(
+                    'Вы уже подписаны на этого пользователя')
         if request.method == 'DELETE' and not Follow.objects.filter(
                 user=user, author=author).exists():
             raise serializers.ValidationError(
@@ -84,9 +78,8 @@ class FollowSerializer(serializers.ModelSerializer):
         return data
 
     def get_is_subscribed(self, obj):
-        author = get_object_or_404(User, id=self.context['view'].kwargs.get('id'))
         return Follow.objects.filter(user=self.context['request'].user,
-                                     author=author).exists()
+                                     author=obj.author).exists()
 
 
 class FollowingGetSerializer(FollowSerializer):
