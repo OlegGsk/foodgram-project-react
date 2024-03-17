@@ -132,8 +132,9 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     def validate(self, data):
         request = self.context.get('request')
         user = self.context.get('request').user
-        recipe = get_object_or_404(Recipe,
-                                   pk=self.context.get('view').kwargs.get('id'))
+        # recipe = get_object_or_404(Recipe,
+        #                            pk=self.context.get('view').kwargs.get('id'))
+        recipe = self.context.get('recipe')
         if request.method == 'POST':
             if ShoppingCart.objects.filter(user=user,
                                            recipe=recipe).exists():
@@ -156,9 +157,7 @@ class FavoriteSerializer(ShoppingCartSerializer):
     def validate(self, data):
         request = self.context.get('request')
         user = self.context.get('request').user
-        recipe = get_object_or_404(Recipe,
-                                   pk=self.context.get(
-                                       'view').kwargs.get('id'))
+        recipe = self.context.get('recipe')
         if request.method == 'POST':
             if Favorites.objects.filter(user=user, recipe=recipe).exists():
                 raise serializers.ValidationError(

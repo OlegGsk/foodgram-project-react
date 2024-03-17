@@ -16,7 +16,8 @@ from recipes.models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from core.utils import create_delete_instance
+
 
 User = get_user_model()
 
@@ -64,39 +65,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save(author=self.request.user)
 
-    @action(detail=True, methods=['post', 'delete'],
-            serializer_class=FavoriteSerializer)
+    @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, id):
-        recipe = get_object_or_404(Recipe, id=id)
-        serializer = self.get_serializer(data=request.data)
-        if request.method == 'POST':
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user=self.request.user, recipe=recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return create_delete_instance(request, Favorites,
+                                      FavoriteSerializer, id)
 
-        if request.method == 'DELETE':
-            serializer.is_valid(raise_exception=True)
-            Favorites.objects.filter(user=self.request.user,
-                                     recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    @action(detail=True, methods=['post', 'delete'],
-            serializer_class=ShoppingCartSerializer)
+    @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, id):
-        recipe = get_object_or_404(Recipe, id=id)
-        serializer = self.get_serializer(data=request.data)
-        if request.method == 'POST':
-            serializer.is_valid(raise_exception=True)
-            serializer.save(user=self.request.user, recipe=recipe)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            serializer.is_valid(raise_exception=True)
-            ShoppingCart.objects.filter(user=self.request.user,
-                                        recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return create_delete_instance(request, ShoppingCart,
+                                      ShoppingCartSerializer, id)
 
 
 # class DownloadShoppingCart(APIView):

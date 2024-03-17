@@ -1,13 +1,17 @@
-from django.contrib import admin
-
-# Register your models here.
 from django.shortcuts import get_object_or_404
 from django.core.files.base import ContentFile
 from rest_framework import serializers, status
 from rest_framework.response import Response
+from recipes.models import Recipe
 
-def create_delete_instance(request, model, serializer, recipe):
-    serializer = serializer(data=request.data)
+
+def create_delete_instance(request, model, serializer, id):
+    if not Recipe.objects.filter(id=id).exists():
+        return Response(status=status.HTTP_404_NOT_FOUND,
+                        data='Рецепт не найден')
+    recipe = get_object_or_404(Recipe, id=id)
+    serializer = serializer(data=request.data, context={'request': request,
+                                                        'recipe': recipe})
     if request.method == 'POST':
         serializer.is_valid(raise_exception=True)
         serializer.save(user=request.user, recipe=recipe)
