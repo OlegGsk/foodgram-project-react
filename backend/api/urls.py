@@ -16,10 +16,10 @@ router.register('recipes', viewset=RecipeViewSet, basename='recipes')
 urlpatterns = [
     path('recipes/download_shopping_cart/', DownloadShoppingCart.as_view()),
     path('', include(router.urls)),
-    path('recipes/<int:id>/favorite/', FavoriteViewSet.as_view(
-        {'post': 'create', 'delete': 'destroy'})),
-    path('recipes/<int:id>/shopping_cart/', ShoppingCartViewSet.as_view(
-        {'post': 'create', 'delete': 'destroy'}
-    )),
+    # path('recipes/<int:id>/favorite/', FavoriteViewSet.as_view(
+    #     {'post': 'create', 'delete': 'destroy'})),
+    # path('recipes/<int:id>/shopping_cart/', ShoppingCartViewSet.as_view(
+    #     {'post': 'create', 'delete': 'destroy'}
+    # )),
     path('', include('users.urls'))
     ]

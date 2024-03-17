@@ -1,4 +1,6 @@
 from re import A
+from symbol import parameters
+from django.http import QueryDict
 from django.shortcuts import get_object_or_404
 from requests import delete
 from rest_framework import serializers
@@ -12,9 +14,9 @@ User = get_user_model()
 
 
 class AlterRecipeSerializer(serializers.ModelSerializer):
-
+    
     class Meta:
-        model = Recipe()
+        model = Recipe
         fields = "id", "name", "image", "cooking_time"
         read_only_fields = ("__all__",)
 
@@ -45,8 +47,10 @@ class CustomUserSerializer(UserSerializer):
 class FollowSerializer(serializers.ModelSerializer):
     recipes = AlterRecipeSerializer(source='author.recipes', many=True,
                                     read_only=True)
-    recipes_count = serializers.SerializerMethodField()
-    is_subscribed = serializers.BooleanField(read_only=True)
+    recipes_count = serializers.IntegerField(
+        source='author.recipes.count', read_only=True
+    )
+    is_subscribed = serializers.SerializerMethodField()
     id = serializers.PrimaryKeyRelatedField(source='author.id', read_only=True)
     email = serializers.EmailField(source='author.email', read_only=True)
     username = serializers.CharField(source='author.username', read_only=True)
@@ -70,10 +74,6 @@ class FollowSerializer(serializers.ModelSerializer):
                 'Вы уже подписаны на этого пользователя')
         return data
 
-    def get_recipes_count(self, obj):
-        author = get_object_or_404(User, id=self.context['view'].kwargs.get('id'))
-        return author.recipes.count()
-
     def get_is_subscribed(self, obj):
         author = get_object_or_404(User, id=self.context['view'].kwargs.get('id'))
         return Follow.objects.filter(user=self.context['request'].user,
@@ -93,3 +93,5 @@ class FollowingGetSerializer(serializers.ModelSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'recipes')
         read_only_fields = ('__all__',)
+
+        
