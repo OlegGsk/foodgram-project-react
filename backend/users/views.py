@@ -1,49 +1,30 @@
 from django.contrib.auth import get_user_model
-from rest_framework import filters, permissions, status, viewsets
-from rest_framework.pagination import LimitOffsetPagination
-from users.serializers import FollowSerializer, FollowingGetSerializer
-from django.db.models import Exists, Subquery, OuterRef
-from rest_framework.decorators import action
-from djoser.views import UserViewSet
-from users.models import Follow
-from recipes.models import Recipe
-from rest_framework.response import Response
+from django.db.models import Exists, OuterRef, Subquery
 from django.shortcuts import get_object_or_404
-
+from django_filters.rest_framework import DjangoFilterBackend
+from djoser.views import UserViewSet
+from recipes.models import Recipe
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
+from users.models import Follow
+from users.serializers import FollowingGetSerializer, FollowSerializer
 
 User = get_user_model()
 
 
-class FollowingViewSet(viewsets.ModelViewSet):
-    serializer_class = FollowSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    # pagination_class = PageNumberPagination
-    queryset = Follow.objects.all()
-    lookup_field = 'id'
-    # http_method_names = ['get', 'post', 'delete']
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['user__username', 'author__username']
+class FollowingViewSet(UserViewSet):
+    pagination_class = LimitOffsetPagination
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        author = get_object_or_404(User, pk=self.kwargs.get('id'))
-        serializer.save(user=user, author=author)
-
-    def get_object(self):
-        user = self.request.user
-        author = get_object_or_404(User, pk=self.kwargs.get('id'))
-        return get_object_or_404(Follow, author=author, user=user)
-
-
-    @action(detail=False, methods=['get'],
-            pagination_class=LimitOffsetPagination)
+    @action(detail=False, methods=['get'])
     def subscriptions(self, request):
         user = self.request.user
         queryset = Follow.objects.filter(user=user)
         page = self.paginate_queryset(queryset)
-        serializer = FollowingGetSerializer(page, many=True)
+        serializer = FollowingGetSerializer(page, many=True,
+                                            context={'request': request})                         
         return self.get_paginated_response(serializer.data)
-
 
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=FollowSerializer)
@@ -55,20 +36,7 @@ class FollowingViewSet(viewsets.ModelViewSet):
             serializer.save(user=self.request.user, author=author)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
-            self.get_object().delete()
+            serializer.is_valid(raise_exception=True)
+            Follow.objects.filter(user=self.request.user, author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-# class FollowingGetViewSet(viewsets.ReadOnlyModelViewSet):
-#     serializer_class = FollowingGetSerializer
-#     permission_classes = [permissions.IsAuthenticated]
-#     pagination_class = LimitOffsetPagination
-#     queryset = Follow.objects.all()
-#     http_method_names = ['get']
-    # filter_backends = [filters.SearchFilter]
-    # search_fields = ['user__username', 'author__username']
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     return Follow.objects.filter(user=user).select_related('author').annotate(
-    #         recipes=
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

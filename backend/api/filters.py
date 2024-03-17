@@ -1,6 +1,8 @@
+from codecs import lookup
 import django_filters
 
 from recipes.models import Recipe, Tag
+from users.models import User, Follow
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -20,6 +22,7 @@ class RecipeFilter(django_filters.FilterSet):
         field_name='is_in_shopping_cart',
         method='filter_is_in_shopping_cart'
     )
+    
 
     def filter_is_favorited(self, queryset, name, value):
         if value == 1:
@@ -34,3 +37,4 @@ class RecipeFilter(django_filters.FilterSet):
     class Meta:
         model = Recipe
         fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart')
+
