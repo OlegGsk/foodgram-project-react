@@ -1,8 +1,6 @@
-from codecs import lookup
 import django_filters
 
-from recipes.models import Recipe, Tag
-from users.models import User, Follow
+from recipes.models import Recipe, Tag, Ingredient
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -22,7 +20,6 @@ class RecipeFilter(django_filters.FilterSet):
         field_name='is_in_shopping_cart',
         method='filter_is_in_shopping_cart'
     )
-    
 
     def filter_is_favorited(self, queryset, name, value):
         if value == 1:
@@ -38,3 +35,13 @@ class RecipeFilter(django_filters.FilterSet):
         model = Recipe
         fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart')
 
+
+class IngredientFilter(django_filters.FilterSet):
+    name = django_filters.CharFilter(
+        field_name='name',
+        lookup_expr='istartswith'
+    )
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)

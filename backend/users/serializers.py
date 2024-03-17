@@ -1,20 +1,16 @@
-from re import A
-from symbol import parameters
-from django.http import QueryDict
-from django.shortcuts import get_object_or_404
-from requests import delete
-from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.contrib.auth import get_user_model
-from users.models import Follow
+from django.shortcuts import get_object_or_404
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from rest_framework import serializers
+
 from recipes.models import Recipe
-# from api.serializers import AlterRecipeSerializer
+from users.models import Follow
 
 User = get_user_model()
 
 
 class AlterRecipeSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Recipe
         fields = "id", "name", "image", "cooking_time"
@@ -66,10 +62,15 @@ class FollowSerializer(serializers.ModelSerializer):
     def validate(self, data):
         user = self.context['request'].user
         request = self.context['request']
-        if not User.objects.filter(id=self.context['view'].kwargs.get('id')).exists():
+
+        if not User.objects.filter(id=self.context['view'].kwargs.get('id')
+                                   ).exists():
             raise serializers.ValidationError(
                 'Пользователя с таким id не существует')
-        author = get_object_or_404(User, id=self.context['view'].kwargs.get('id'))
+
+        author = get_object_or_404(User,
+                                   id=self.context['view'].kwargs.get('id'))
+
         if author == user:
             raise serializers.ValidationError(
                 'Вы не можете подписаться на себя')
@@ -80,7 +81,6 @@ class FollowSerializer(serializers.ModelSerializer):
                 user=user, author=author).exists():
             raise serializers.ValidationError(
                 'Вы не подписаны на этого пользователя')
-        
         return data
 
     def get_is_subscribed(self, obj):
@@ -91,22 +91,18 @@ class FollowSerializer(serializers.ModelSerializer):
 
 class FollowingGetSerializer(FollowSerializer):
     recipes = serializers.SerializerMethodField()
-    # id = serializers.PrimaryKeyRelatedField(source='author.id', read_only=True)
-    # email = serializers.EmailField(source='author.email', read_only=True)
-    # username = serializers.CharField(source='author.username', read_only=True)
-    # first_name = serializers.CharField(source='author.first_name', read_only=True)
-    # last_name = serializers.CharField(source='author.last_name', read_only=True)
 
     class Meta:
         model = Follow
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'recipes')
         read_only_fields = ('__all__',)
-    
+
     def get_recipes(self, obj):
         request = self.context.get('request')
         recipes_limit = request.query_params.get('recipes_limit')
         recipes = Recipe.objects.filter(author=obj.author)
         if not recipes_limit:
             return AlterRecipeSerializer(recipes, many=True).data
-        return AlterRecipeSerializer(recipes[:int(recipes_limit)], many=True).data
+        return AlterRecipeSerializer(recipes[:int(recipes_limit)],
+                                     many=True).data

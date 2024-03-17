@@ -1,9 +1,6 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef, Subquery
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
-from recipes.models import Recipe
 from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -16,15 +13,19 @@ User = get_user_model()
 
 class FollowingViewSet(UserViewSet):
     pagination_class = LimitOffsetPagination
+    permissions_class = (permissions.IsAuthenticated,)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'],
+            serializer_class=FollowingGetSerializer)
     def subscriptions(self, request):
         user = self.request.user
         queryset = Follow.objects.filter(user=user)
         page = self.paginate_queryset(queryset)
-        serializer = FollowingGetSerializer(page, many=True,
-                                            context={'request': request})                         
-        return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(page, many=True,
+                                         context={'request': request})
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=FollowSerializer)
@@ -37,6 +38,7 @@ class FollowingViewSet(UserViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
             serializer.is_valid(raise_exception=True)
-            Follow.objects.filter(user=self.request.user, author=author).delete()
+            Follow.objects.filter(user=self.request.user,
+                                  author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
