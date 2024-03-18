@@ -8,7 +8,7 @@ from api.serializers import (FavoriteSerializer, IngredientGetSerializer,
                              IngredientSerializer, RecipeSerializer,
                              ShoppingCartSerializer, TagSerializer)
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, Subquery
+from django.db.models import Exists, Subquery, Value, OuterRef
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -47,6 +47,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
     lookup_url_kwarg = 'id'
 
     def get_queryset(self):
+
+        user = self.request.user
+        if self.action == 'list' or user.is_anonymous:
+            return Recipe.objects.annotate(
+                is_favorited=Exists(
+                    Subquery(Favorites.objects.filter(
+                        user_id=OuterRef('author_id'),
+                        recipe_id=OuterRef('pk')))),
+                is_in_shopping_cart=Exists(
+                    Subquery(ShoppingCart.objects.filter(
+                        user=OuterRef('author_id'),
+                        recipe_id=OuterRef('pk')
+                    )))).select_related('author'
+                                        ).prefetch_related('tags',
+                                                           'ingredients')
+
         return Recipe.objects.all().annotate(
             is_favorited=Exists(
                 Subquery(Favorites.objects.filter(
@@ -57,7 +73,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 Subquery(ShoppingCart.objects.filter(
                     user=self.request.user,
                     recipe_id=self.kwargs.get('id')
-                ))))
+                )))).select_related('author').prefetch_related('tags',
+                                                             'ingredients')
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
