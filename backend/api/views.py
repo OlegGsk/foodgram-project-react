@@ -6,7 +6,8 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAutehenticatedOrAuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientGetSerializer,
                              IngredientSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, TagSerializer)
+                             ShoppingCartSerializer, TagSerializer,
+                             RecipeGetSerializer)
 from django.contrib.auth import get_user_model
 from django.db.models import Exists, Subquery, Value, OuterRef
 from django.http import HttpResponse
@@ -45,11 +46,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'post', 'put', 'delete']
     permission_classes = [IsAutehenticatedOrAuthorOrReadOnly]
     lookup_url_kwarg = 'id'
+    
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return RecipeGetSerializer
+        return RecipeSerializer
 
     def get_queryset(self):
 
         user = self.request.user
-        if self.action == 'list' or user.is_anonymous:
+        if self.action in ('list', 'create') or user.is_anonymous:
             return Recipe.objects.annotate(
                 is_favorited=Exists(
                     Subquery(Favorites.objects.filter(
