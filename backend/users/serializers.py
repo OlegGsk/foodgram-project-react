@@ -1,3 +1,4 @@
+import re
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
@@ -25,6 +26,16 @@ class CustomCreateUserSerializer(UserCreateSerializer):
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'password')
         read_only_fields = ('id',)
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя не может быть "me"'
+            )
+        if not bool(re.match(r'^[\w.@+-]+$', value)):
+            raise serializers.ValidationError(
+                'Некорректные символы в username')
+        return value
 
 
 class CustomUserSerializer(UserSerializer):
