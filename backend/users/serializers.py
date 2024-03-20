@@ -55,8 +55,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    recipes = AlterRecipeSerializer(source='author.recipes', many=True,
-                                    read_only=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(
         source='author.recipes.count', read_only=True
     )
@@ -95,16 +94,6 @@ class FollowSerializer(serializers.ModelSerializer):
         return Follow.objects.filter(user=self.context['request'].user,
                                      author=obj.author).exists()
 
-
-class FollowingGetSerializer(FollowSerializer):
-    recipes = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Follow
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'recipes')
-        read_only_fields = ('__all__',)
-
     def get_recipes(self, obj):
         user = self.context['request'].user
         request = self.context.get('request')
@@ -116,3 +105,13 @@ class FollowingGetSerializer(FollowSerializer):
             return AlterRecipeSerializer(recipes, many=True).data
         return AlterRecipeSerializer(recipes[:int(recipes_limit)],
                                      many=True).data
+
+
+class FollowingGetSerializer(FollowSerializer):
+    # recipes = serializers.SerializerMethodField()
+
+    class Meta(FollowSerializer.Meta):
+        model = Follow
+        # fields = ('email', 'id', 'username', 'first_name', 'last_name',
+        #           'recipes')
+        # read_only_fields = ('__all__',)

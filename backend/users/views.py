@@ -13,8 +13,13 @@ User = get_user_model()
 
 class FollowingViewSet(UserViewSet):
 
+    def get_permissions(self):
+        if self.action == 'me':
+            return [permissions.IsAuthenticated()]
+        return super().get_permissions()
+
     @action(detail=False, methods=['get'],
-            serializer_class=FollowingGetSerializer,
+            serializer_class=FollowSerializer,
             permission_classes=[permissions.IsAuthenticated])
     def subscriptions(self, request):
         user = self.request.user
@@ -28,7 +33,7 @@ class FollowingViewSet(UserViewSet):
 
     @action(detail=True, methods=['post', 'delete'],
             serializer_class=FollowSerializer,
-            permission_classes=[permissions.IsAuthenticated])
+            permission_classes=[permissions.IsAuthenticated,])
     def subscribe(self, request, id):
         if not User.objects.filter(id=id).exists():
             return Response(status=status.HTTP_404_NOT_FOUND,

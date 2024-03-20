@@ -1,4 +1,4 @@
-from tabnanny import verbose
+from django.core.validators import MinValueValidator
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -42,14 +42,12 @@ class Recipe(models.Model):
     ingredients = models.ManyToManyField('Ingredient',
                                          through='RecipeIngredient')
     tags = models.ManyToManyField('Tag', through='RecipeTag')
-    cooking_time = models.PositiveSmallIntegerField('Время приготовления',
-                                                    default=1)
+    cooking_time = models.PositiveSmallIntegerField(
+        'Время приготовления',
+        validators=[
+            MinValueValidator(1,
+                              'Время приготовления должно быть больше нуля')])
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
-
-    def validate_cooking_time(self):
-        if self.cooking_time <= 0:
-            raise models.ValidationError(
-                'Время приготовления должно быть больше нуля')
 
     class Meta:
         verbose_name = 'Рецепт'

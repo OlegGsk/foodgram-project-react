@@ -9,7 +9,7 @@ from rest_framework.response import Response
 
 def create_delete_instance(request, model, serializer, id):
     if not Recipe.objects.filter(id=id).exists():
-        return Response(status=status.HTTP_404_NOT_FOUND,
+        return Response(status=status.HTTP_400_BAD_REQUEST,
                         data='Рецепт не найден')
     recipe = get_object_or_404(Recipe, id=id)
     serializer = serializer(data=request.data, context={'request': request,
