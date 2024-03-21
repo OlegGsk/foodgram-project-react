@@ -10,7 +10,7 @@ class Command(BaseCommand):
     help = 'Import ingredients from csv file'
 
     def handle(self, *args, **options):
-        file = os.path.join('..', 'data/ingredients.csv')
+        file = os.path.join('data/ingredients.csv')
         with open(file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
@@ -31,7 +31,7 @@ class Command(BaseCommand):
             'Импорт завершен'
         ))
 
-        file = os.path.join('..', 'data/tags.csv')
+        file = os.path.join('data/tags.csv')
         with open(file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
