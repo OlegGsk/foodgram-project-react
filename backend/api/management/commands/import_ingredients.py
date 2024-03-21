@@ -29,7 +29,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             'Импорт завершен'
         ))
-        
+
         file = os.path.join('..', 'data/tags.csv')
         with open(file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)

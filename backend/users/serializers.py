@@ -1,6 +1,5 @@
 import re
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
@@ -63,8 +62,10 @@ class FollowSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(source='author.id', read_only=True)
     email = serializers.EmailField(source='author.email', read_only=True)
     username = serializers.CharField(source='author.username', read_only=True)
-    first_name = serializers.CharField(source='author.first_name', read_only=True)
-    last_name = serializers.CharField(source='author.last_name', read_only=True)
+    first_name = serializers.CharField(source='author.first_name',
+                                       read_only=True)
+    last_name = serializers.CharField(source='author.last_name',
+                                      read_only=True)
 
     class Meta:
         model = Follow
@@ -105,13 +106,3 @@ class FollowSerializer(serializers.ModelSerializer):
             return AlterRecipeSerializer(recipes, many=True).data
         return AlterRecipeSerializer(recipes[:int(recipes_limit)],
                                      many=True).data
-
-
-class FollowingGetSerializer(FollowSerializer):
-    # recipes = serializers.SerializerMethodField()
-
-    class Meta(FollowSerializer.Meta):
-        model = Follow
-        # fields = ('email', 'id', 'username', 'first_name', 'last_name',
-        #           'recipes')
-        # read_only_fields = ('__all__',)

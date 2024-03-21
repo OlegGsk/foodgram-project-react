@@ -2,9 +2,10 @@ import base64
 
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
-from recipes.models import Recipe
 from rest_framework import serializers, status
 from rest_framework.response import Response
+
+from recipes.models import Recipe
 
 
 def create_delete_instance(request, model, serializer, id):
@@ -14,7 +15,6 @@ def create_delete_instance(request, model, serializer, id):
         if not is_located_recipe:
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data='Рецепт не найден')
-        # recipe = get_object_or_404(Recipe, id=id)
         serializer = serializer(data=request.data,
                                 context={'request': request,
                                          'recipe': get_recipe(id)})
@@ -26,7 +26,6 @@ def create_delete_instance(request, model, serializer, id):
         if not is_located_recipe:
             return Response(status=status.HTTP_404_NOT_FOUND,
                             data='Рецепт не найден')
-        # recipe = get_object_or_404(Recipe, id=id)
         serializer = serializer(data=request.data,
                                 context={'request': request,
                                          'recipe': get_recipe(id)})

@@ -1,5 +1,6 @@
-from rest_framework import serializers, status
+from rest_framework import serializers
 from django.db import transaction
+
 from core.utils import Base64ImageField
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             RecipeTag, ShoppingCart, Tag)
@@ -78,29 +79,16 @@ class RecipeSerializer(serializers.ModelSerializer):
                 'Ингредиенты не должны повторяться!!')
         return value
 
-    # def validate_cooking_time(self, value):
-    #     if not value:
-    #         raise serializers.ValidationError(
-    #             'Время приготовления не может быть пустым')
-    #     if value <= 0:
-    #         raise serializers.ValidationError(
-    #             'Время приготовления должно быть больше нуля')
-    #     return value
-
     @transaction.atomic
     def create(self, validated_data):
         ingredients = validated_data.pop('recipe_ingredients')
         tags = validated_data.pop('tags')
         recipe = Recipe.objects.create(**validated_data)
+
         for tag in tags:
             RecipeTag.objects.create(recipe=recipe, tag=tag)
+
         for ingredient in ingredients:
-            # name = ingredient.get('ingredients').get('name')
-            # measurement_unit = ingredient.get(
-            #     'ingredients').get('measurement_unit')
-            # amount = ingredient.get('amount')
-            # current_ingredient = Ingredient.objects.get(
-            #     name=name, measurement_unit=measurement_unit)
             id = ingredient.get('ingredients').get('id')
             amount = ingredient.get('amount')
             current_ingredient = Ingredient.objects.get(
@@ -130,6 +118,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         instance.cooking_time = validated_data.get(
             'cooking_time', instance.cooking_time
         )
+
         if 'recipe_ingredients' in validated_data:
             ingredients = validated_data.pop('recipe_ingredients')
             RecipeIngredient.objects.filter(recipe=instance).delete()
