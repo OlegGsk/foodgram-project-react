@@ -13,6 +13,10 @@ class Ingredient(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+
 
 class Tag(models.Model):
     name = models.CharField('Название', max_length=200)
@@ -67,6 +71,10 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return self.ingredients.name
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецепта'
 
 
 class RecipeTag(models.Model):

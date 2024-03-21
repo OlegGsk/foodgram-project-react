@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.db import transaction
+from rest_framework import serializers
 
 from core.utils import Base64ImageField
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
