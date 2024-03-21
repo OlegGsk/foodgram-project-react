@@ -1,24 +1,20 @@
-
-import csv
+from django.contrib.auth import get_user_model
+from django.db.models import Exists, OuterRef, Subquery, Sum
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAutehenticatedOrAuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientGetSerializer,
-                             IngredientSerializer, RecipeSerializer,
-                             ShoppingCartSerializer, TagSerializer,
-                             RecipeGetSerializer)
-from django.contrib.auth import get_user_model
-from django.db.models import Exists, Subquery, Value, OuterRef, Sum
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorites, Ingredient, Recipe, ShoppingCart, Tag,
-                            RecipeIngredient)
-from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action
-from rest_framework.response import Response
+                             RecipeGetSerializer,
+                             RecipeSerializer, ShoppingCartSerializer,
+                             TagSerializer)
 from core.utils import create_delete_instance
-
 
 User = get_user_model()
 
@@ -43,6 +39,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = [DjangoFilterBackend,]
     filterset_class = RecipeFilter
@@ -57,8 +54,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
-        # user = self.request.user
-        # if self.action in ('list', 'create') or user.is_anonymous:
         return Recipe.objects.annotate(
             is_favorited=Exists(
                 Subquery(Favorites.objects.filter(
