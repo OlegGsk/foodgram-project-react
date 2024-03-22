@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
-from recipes.models import Recipe
+from recipes.models import Recipe, RecipeIngredient, Ingredient, RecipeTag
 
 
 def create_delete_instance(request, model, serializer, id):
@@ -49,3 +49,18 @@ class Base64ImageField(serializers.ImageField):
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
+
+
+def create_update_ingredients(ingredients, instance):
+    for ingredient in ingredients:
+        id = ingredient.get('ingredients').get('id')
+        amount = ingredient.get('amount')
+        ingredient = Ingredient.objects.get(id=id)
+        RecipeIngredient.objects.create(recipe=instance,
+                                        ingredients=ingredient,
+                                        amount=amount)
+
+
+def create_update_tags(tags, instance):
+    for tag in tags:
+        RecipeTag.objects.create(recipe=instance, tag=tag)
