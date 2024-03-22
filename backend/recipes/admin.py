@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from core.constance import EMPTY_VALUE_DISPLAY
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)

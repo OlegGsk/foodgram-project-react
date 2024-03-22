@@ -2,19 +2,17 @@ from django.contrib.auth import get_user_model
 from django.db.models import Exists, OuterRef, Subquery, Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
 from rest_framework import filters, permissions, viewsets
 from rest_framework.decorators import action
-
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.permissions import IsAutehenticatedOrAuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientGetSerializer,
-                             RecipeGetSerializer,
-                             RecipeSerializer, ShoppingCartSerializer,
-                             TagSerializer)
+                             RecipeGetSerializer, RecipeSerializer,
+                             ShoppingCartSerializer, TagSerializer)
 from core.utils import create_delete_instance
+from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 
 User = get_user_model()
 

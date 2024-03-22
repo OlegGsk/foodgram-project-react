@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from core.utils import (Base64ImageField, create_update_ingredients,
                         create_update_tags)
-
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             RecipeTag, ShoppingCart, Tag)
 from users.serializers import CustomUserSerializer

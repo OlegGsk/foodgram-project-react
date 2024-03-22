@@ -1,6 +1,7 @@
 from django.contrib import admin
+
 from core.constance import EMPTY_VALUE_DISPLAY
-from users.models import User, Follow
+from users.models import Follow, User
 
 
 @admin.register(User)

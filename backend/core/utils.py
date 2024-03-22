@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
-from recipes.models import Recipe, RecipeIngredient, Ingredient, RecipeTag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, RecipeTag
 
 
 def create_delete_instance(request, model, serializer, id):
