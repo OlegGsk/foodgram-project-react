@@ -102,4 +102,4 @@ jobs:
 
           sudo docker compose -f exec foodgram-backend-1 python manage.py migrate
           sudo docker compose -f exec foodgram-backend-1 python manage.py import_ingredients
-          sudo docker compose -f  exec foodgram-backend-1 python manage.py collectstatic
+          sudo docker compose -f exec foodgram-backend-1 python manage.py collectstatic
