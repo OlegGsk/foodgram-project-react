@@ -11,11 +11,12 @@ services:
     volumes:
       - pg_data:/var/lib/postgresql/data/
     env_file:
-      - ../.env
+      - ./.env
 
   backend:
-    build: ../backend/
-    env_file: ../.env
+    # image: oleggsk/foodgram_backend:latest
+    build: ../backend
+    env_file: ./.env
     volumes:
       - media:/app/media/
       - static:/app/static/
@@ -23,11 +24,12 @@ services:
       - db
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    # image: oleggsk/foodgram_frontend:latest
+    build: ../frontend
     volumes:
       - ../frontend/:/app/result_build/
+    depends_on:
+      - backend
 
   nginx:
     image: nginx:1.22.1
