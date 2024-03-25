@@ -93,7 +93,7 @@ jobs:
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
 
         script: |
-          cd kittygram
+          cd foodgram
 
           sudo docker compose pull
 
