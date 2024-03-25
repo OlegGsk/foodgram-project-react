@@ -83,6 +83,7 @@ jobs:
         source: "infra/"
         target: "foodgram1"
         overwrite: true
+        strip_components: 1
     # - name: Executing remote ssh commands to deploy
     #   uses: appleboy/ssh-action@master
     #   with:
