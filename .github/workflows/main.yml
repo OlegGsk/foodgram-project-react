@@ -95,7 +95,7 @@ jobs:
         script: |
           cd foodgram
 
-          echo DEBUG=${{ secrets.DEBUG }} > .env
+          echo "${{ secrets.ENV_FILE }}" > .env
 
           # sudo docker compose pull
 
