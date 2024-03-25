@@ -14,8 +14,7 @@ services:
       - ./.env
 
   backend:
-    # image: oleggsk/foodgram_backend:latest
-    build: ../backend
+    image: oleggsk/foodgram_backend:latest
     env_file: ./.env
     volumes:
       - media:/app/media/
@@ -24,8 +23,7 @@ services:
       - db
 
   frontend:
-    # image: oleggsk/foodgram_frontend:latest
-    build: ../frontend
+    image: oleggsk/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
