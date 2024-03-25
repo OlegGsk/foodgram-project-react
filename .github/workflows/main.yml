@@ -80,9 +80,8 @@ jobs:
         username: ${{ secrets.USER }}
         key: ${{ secrets.SSH_KEY }}
         passphrase: ${{ secrets.SSH_PASSPHRASE }}
-        source: "infra/docker-compose1.yml"
-        target: "foodgram"
-        strip_components: 1
+        source: "infra/"
+        target: "foodgram1"
         overwrite: true
     # - name: Executing remote ssh commands to deploy
     #   uses: appleboy/ssh-action@master
