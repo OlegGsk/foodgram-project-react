@@ -48,7 +48,6 @@ services:
     restart: always
 
     depends_on:
-      - db
       - backend
       - frontend
   letsencrypt:
@@ -63,5 +62,8 @@ services:
       - /tmp/letsencrypt/www:/tmp/letsencrypt/www
       - ./certs:/etc/nginx/certs
     env_file: ./.env
+
+    depends_on:
+      - nginx
 
     restart: unless-stopped
