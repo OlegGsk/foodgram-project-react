@@ -18,3 +18,11 @@ https://foodgram-project.ddnsking.com
 
 API документация доступна по адресу:
 https://foodgram-project.ddnsking.com/api/docs/
+
+Admin:
+- email: admin@admin.com
+- password: admin
+
+User:
+- email: user@user.com
+- password: user9000
