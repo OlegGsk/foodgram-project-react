@@ -12,7 +12,7 @@ User = get_user_model()
 
 
 class FollowingViewSet(UserViewSet):
-    """Получение информации о подписках, создание и удаление подписок"""
+    """Получение информации о подписках, создание и удаление подписок."""
     def get_permissions(self):
         if self.action == 'me':
             return [permissions.IsAuthenticated()]

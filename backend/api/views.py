@@ -18,7 +18,7 @@ User = get_user_model()
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
-    """Получение тегов"""
+    """Получение тегов."""
     permission_classes = [permissions.AllowAny]
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -28,7 +28,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
-    """Получение ингредиентов"""
+    """Получение ингредиентов."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientGetSerializer
     permission_classes = [permissions.AllowAny]
@@ -39,7 +39,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    """Создание, получение и изменение рецептов """
+    """Создание, получение и изменение рецептов."""
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = [DjangoFilterBackend, ]
@@ -76,30 +76,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, id):
-        """Добавление или удаление рецепта из избранного"""
+        """Добавление или удаление рецепта из избранного."""
         return create_delete_instance(request, Favorites,
                                       FavoriteSerializer, id)
 
     @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, id):
-        """Добавление или удаление рецепта в список покупок"""
+        """Добавление или удаление рецепта в список покупок."""
         return create_delete_instance(request, ShoppingCart,
                                       ShoppingCartSerializer, id)
 
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
-        """Скачивание списка покупок"""
+        """Скачивание списка покупок."""
         ingredients = RecipeIngredient.objects.filter(
-            recipe__shopping_cart__user=request.user).values(
+            recipe__shoppingcart__user=request.user).values(
             'ingredients__name',
-            'ingredients__measurement_unit').annotate(amount=Sum('amount'))
+            'ingredients__measurement_unit').annotate(
+                total_amount=Sum('amount'))
         shop_list = ['Список покупок:\n']
         shop_list += ['наименование - количество - единицы измерения\n']
         for ingredient in ingredients:
             shop_list.append(
                 f'{ingredient["ingredients__name"]}'
-                f'          {ingredient["amount"]} '
+                f'          {ingredient["total_amount"]} '
                 f'           {ingredient["ingredients__measurement_unit"]}\n'
             )
 

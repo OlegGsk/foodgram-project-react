@@ -9,14 +9,14 @@ from users.serializers import CustomUserSerializer
 
 
 class TagSerializer(serializers.ModelSerializer):
-    """Сериализатор для тегов"""
+    """Сериализатор для тегов."""
     class Meta:
         model = Tag
         fields = ('id', 'name', 'color', 'slug')
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для ингредиентов в рецепте"""
+    """Сериализатор для ингредиентов в рецепте."""
     id = serializers.IntegerField(source='ingredients.id')
     name = serializers.CharField(source='ingredients.name',
                                  required=False)
@@ -31,14 +31,14 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 
 class IngredientGetSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения ингредиентов"""
+    """Сериализатор для получения ингредиентов."""
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для создания и изменения рецептов"""
+    """Сериализатор для создания и изменения рецептов."""
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True)
@@ -49,8 +49,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('ingredients', 'tags', 'image', 'name', 'text',
                   'cooking_time')
-        # read_only_fields = ('author', 'id', 'is_favorited',
-        #                     'is_in_shopping_cart')
 
     def validate_tags(self, value):
         if not value:
@@ -126,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeGetSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения рецептов"""
+    """Сериализатор для получения рецептов."""
     tags = TagSerializer(many=True, read_only=True)
     ingredients = IngredientSerializer(source='recipe_ingredients',
                                        many=True)
@@ -144,7 +142,7 @@ class RecipeGetSerializer(serializers.ModelSerializer):
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
-    """Сериализатор для добавления рецептов в список покупок """
+    """Сериализатор для добавления рецептов в список покупок."""
     id = serializers.ReadOnlyField(source='recipe.id')
     name = serializers.ReadOnlyField(source='recipe.name')
     image = serializers.ImageField(source='recipe.image', read_only=True)
@@ -174,7 +172,7 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(ShoppingCartSerializer):
-    """Сериализатор для добавления рецептов в избранное"""
+    """Сериализатор для добавления рецептов в избранное."""
     message_post = 'Рецепт уже добавлен в избранное'
     message_delete = 'Рецепта нет в избранном'
 

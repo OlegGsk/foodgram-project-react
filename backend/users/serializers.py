@@ -1,7 +1,5 @@
-import re
-
 from django.contrib.auth import get_user_model
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
 from recipes.models import Recipe
@@ -11,36 +9,15 @@ User = get_user_model()
 
 
 class AlterRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для рецептов в подписках"""
+    """Сериализатор для рецептов в подписках."""
     class Meta:
         model = Recipe
         fields = "id", "name", "image", "cooking_time"
         read_only_fields = ("__all__",)
 
 
-class CustomCreateUserSerializer(UserCreateSerializer):
-    """Сериализатор для создания пользователя"""
-    password = serializers.CharField(write_only=True)
-
-    class Meta(UserCreateSerializer.Meta):
-        model = User
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'password')
-        read_only_fields = ('id',)
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя пользователя не может быть "me"'
-            )
-        if not bool(re.match(r'^[\w.@+-]+$', value)):
-            raise serializers.ValidationError(
-                'Некорректные символы в username')
-        return value
-
-
 class CustomUserSerializer(UserSerializer):
-    """Сериализатор для получения информации о пользователе"""
+    """Сериализатор для получения информации о пользователе."""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
@@ -57,7 +34,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для подписок"""
+    """Сериализатор для подписок."""
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(
         source='author.recipes.count', read_only=True
@@ -75,7 +52,8 @@ class FollowSerializer(serializers.ModelSerializer):
         model = Follow
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'recipes_count', 'is_subscribed', 'recipes')
-        read_only_fields = ('__all__',)
+        read_only_fields = ('email', 'username', 'first_name', 'last_name',
+                            'is_subscribed', 'recipes', 'recipes_count')
 
     def validate(self, data):
         user = self.context['request'].user

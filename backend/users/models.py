@@ -1,17 +1,22 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from core.constance import MAX_LENGTH_EMAIL, MAX_LENGTH_USER_NAME
+from core.validators import validate_username
+
 
 class User(AbstractUser):
     email = models.EmailField(
-        'Почта', max_length=254, unique=True
+        'Почта', max_length=MAX_LENGTH_EMAIL, unique=True
     )
     username = models.CharField(
-        'Имя пользователя', max_length=150, unique=True
-    )
-    first_name = models.CharField('Имя', max_length=150)
-    last_name = models.CharField('Фамилия', max_length=150)
-    password = models.CharField('Пароль', max_length=150)
+        'Имя пользователя', max_length=MAX_LENGTH_USER_NAME, unique=True,
+        validators=[validate_username])
+    first_name = models.CharField('Имя', max_length=MAX_LENGTH_USER_NAME)
+    last_name = models.CharField('Фамилия', max_length=MAX_LENGTH_USER_NAME)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
@@ -30,6 +35,11 @@ class Follow(models.Model):
     )
 
     class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('author')),
+                name='prevent_self_follow',
+            )]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
         ordering = ['-author']
