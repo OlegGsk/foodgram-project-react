@@ -18,6 +18,7 @@ User = get_user_model()
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
+    """Получение тегов"""
     permission_classes = [permissions.AllowAny]
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -27,6 +28,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """Получение ингредиентов"""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientGetSerializer
     permission_classes = [permissions.AllowAny]
@@ -37,6 +39,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """Создание, получение и изменение рецептов """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
     filter_backends = [DjangoFilterBackend,]
@@ -73,17 +76,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'delete'])
     def favorite(self, request, id):
+        """Добавление или удаление рецепта из избранного"""
         return create_delete_instance(request, Favorites,
                                       FavoriteSerializer, id)
 
     @action(detail=True, methods=['post', 'delete'])
     def shopping_cart(self, request, id):
+        """Добавление или удаление рецепта в список покупок"""
         return create_delete_instance(request, ShoppingCart,
                                       ShoppingCartSerializer, id)
 
     @action(detail=False, methods=['get'],
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
+        """Скачивание списка покупок"""
         ingredients = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user).values(
             'ingredients__name',

@@ -5,6 +5,9 @@ from recipes.models import Ingredient, Recipe, Tag
 
 
 class RecipeFilter(FilterSet):
+    """Фильтр рецептов по тегам, автору,
+    и спискам рецептов в избранном и списке покупок
+    """
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',

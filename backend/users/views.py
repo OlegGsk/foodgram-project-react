@@ -12,7 +12,7 @@ User = get_user_model()
 
 
 class FollowingViewSet(UserViewSet):
-
+    """Получение информации о подписках, создание и удаление подписок"""
     def get_permissions(self):
         if self.action == 'me':
             return [permissions.IsAuthenticated()]
@@ -20,7 +20,8 @@ class FollowingViewSet(UserViewSet):
 
     @action(detail=False, methods=['get'],
             serializer_class=FollowSerializer,
-            permission_classes=[permissions.IsAuthenticated])
+            permission_classes=[permissions.IsAuthenticated],
+            )
     def subscriptions(self, request):
         user = self.request.user
         queryset = Follow.objects.filter(user=user)

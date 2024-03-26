@@ -9,6 +9,7 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, RecipeTag
 
 
 def create_delete_instance(request, model, serializer, id):
+    """Создание или удаление рецепта"""
     is_located_recipe = Recipe.objects.filter(id=id).exists()
 
     if request.method == 'POST':
@@ -52,6 +53,7 @@ class Base64ImageField(serializers.ImageField):
 
 
 def create_update_ingredients(ingredients, instance):
+    """Создание или обновление ингредиентов рецепта"""
     for ingredient in ingredients:
         id = ingredient.get('ingredients').get('id')
         amount = ingredient.get('amount')
@@ -62,5 +64,6 @@ def create_update_ingredients(ingredients, instance):
 
 
 def create_update_tags(tags, instance):
+    """Создание или обновление тегов рецепта"""
     for tag in tags:
         RecipeTag.objects.create(recipe=instance, tag=tag)

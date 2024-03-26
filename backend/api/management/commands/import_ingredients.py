@@ -7,6 +7,8 @@ from recipes.models import Ingredient, Tag
 
 
 class Command(BaseCommand):
+    """Команда для импорта ингредиентов и тегов из csv файла
+    """
     help = 'Import ingredients from csv file'
 
     def handle(self, *args, **options):

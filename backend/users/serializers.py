@@ -11,7 +11,7 @@ User = get_user_model()
 
 
 class AlterRecipeSerializer(serializers.ModelSerializer):
-
+    """Сериализатор для рецептов в подписках"""
     class Meta:
         model = Recipe
         fields = "id", "name", "image", "cooking_time"
@@ -19,6 +19,7 @@ class AlterRecipeSerializer(serializers.ModelSerializer):
 
 
 class CustomCreateUserSerializer(UserCreateSerializer):
+    """Сериализатор для создания пользователя"""
     password = serializers.CharField(write_only=True)
 
     class Meta(UserCreateSerializer.Meta):
@@ -39,6 +40,7 @@ class CustomCreateUserSerializer(UserCreateSerializer):
 
 
 class CustomUserSerializer(UserSerializer):
+    """Сериализатор для получения информации о пользователе"""
     is_subscribed = serializers.SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
@@ -55,6 +57,7 @@ class CustomUserSerializer(UserSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    """Сериализатор для подписок"""
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.IntegerField(
         source='author.recipes.count', read_only=True
