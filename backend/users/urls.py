@@ -10,4 +10,4 @@ users_router.register('users', FollowingViewSet)
 
 urlpatterns = [
     path('', include(users_router.urls)),
-    path('auth/', include('djoser.urls.authtoken')),]
+    path('auth/', include('djoser.urls.authtoken')), ]

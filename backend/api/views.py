@@ -33,7 +33,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientGetSerializer
     permission_classes = [permissions.AllowAny]
     pagination_class = None
-    filter_backends = [DjangoFilterBackend,]
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = IngredientFilter
     lookup_url_kwarg = 'id'
 
@@ -42,7 +42,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Создание, получение и изменение рецептов """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    filter_backends = [DjangoFilterBackend,]
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
     http_method_names = ['get', 'post', 'delete', 'patch']
     permission_classes = [IsAutehenticatedOrAuthorOrReadOnly]
