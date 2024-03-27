@@ -5,7 +5,6 @@ from django.db import models
 
 from core.constance import (MAX_LENGTH_COLOR, MAX_LENGTH_MEASUREMENT_UNIT,
                             MAX_LENGTH_NAME, MAX_LENGTH_SLUG)
-# from core.models import CreatedModel
 
 User = get_user_model()
 
