@@ -57,7 +57,7 @@ class Recipe(models.Model):
             MinValueValidator(1,
                               'Время приготовления должно быть больше нуля'),
             MaxValueValidator(300,
-                              'Не больше 300 минут'),])
+                              'Не больше 300 минут')])
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
