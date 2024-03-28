@@ -1,8 +1,8 @@
 from django.db import transaction
 from rest_framework import serializers
 
-from core.utils import (Base64ImageField, create_update_ingredients,
-                        create_update_tags)
+from core.fields import Base64ImageField
+from core.utils import create_update_ingredients, create_update_tags
 from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
                             RecipeTag, ShoppingCart, Tag)
 from users.serializers import CustomUserSerializer
@@ -16,13 +16,12 @@ class TagSerializer(serializers.ModelSerializer):
 
 
 class IngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для ингредиентов в рецепте."""
+    """Сериализатор ингредиентов для создания рецептов."""
+    # Не может быть это поле ReadOnlyField при создании рецепта нужно id
     id = serializers.IntegerField(source='ingredients.id')
-    name = serializers.CharField(source='ingredients.name',
-                                 required=False)
-    measurement_unit = serializers.CharField(
-        source='ingredients.measurement_unit',
-        required=False)
+    name = serializers.ReadOnlyField(source='ingredients.name')
+    measurement_unit = serializers.ReadOnlyField(
+        source='ingredients.measurement_unit')
 
     class Meta:
         model = RecipeIngredient

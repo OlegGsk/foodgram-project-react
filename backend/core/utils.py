@@ -1,9 +1,6 @@
-import base64
-
-from django.core.files.base import ContentFile
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
-from rest_framework import serializers, status
+from rest_framework import status
 from rest_framework.response import Response
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, RecipeTag
@@ -42,17 +39,6 @@ def get_recipe(id):
     return get_object_or_404(Recipe, id=id)
 
 
-class Base64ImageField(serializers.ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
-
-
 def create_update_ingredients(ingredients, instance):
     """Создание или обновление ингредиентов рецепта."""
     for ingredient in ingredients:
@@ -79,14 +65,10 @@ def create_shopping_list(request):
             total_amount=Sum('amount'))
 
     shop_list = ['Список покупок:\n']
-    shop_list += ['наименование' + 23 * ' ' + 'количество'
-                  '        единицы измерения\n']
+
     for ingredient in ingredients:
-        len_1 = ' ' * (35 - len(ingredient['ingredients__name']))
-        len_2 = (53 - (len(len_1) + len(ingredient["ingredients__name"])
-                 + len(str(ingredient['total_amount'])))) * ' '
         shop_list.append(
-            f'{ingredient["ingredients__name"]}'
-            f'{len_1}{ingredient["total_amount"]}'
-            f'{len_2}{ingredient["ingredients__measurement_unit"]}\n')
+            f'{ingredient["ingredients__name"]} - {ingredient["total_amount"]}'
+            f' {ingredient["ingredients__measurement_unit"]}\n'
+        )
     return shop_list
