@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, OuterRef, Subquery, Sum
+from django.db.models import Exists, OuterRef, Subquery
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, permissions, viewsets
@@ -10,9 +10,8 @@ from api.permissions import IsAutehenticatedOrAuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientGetSerializer,
                              RecipeGetSerializer, RecipeSerializer,
                              ShoppingCartSerializer, TagSerializer)
-from core.utils import create_delete_instance
-from recipes.models import (Favorites, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+from core.utils import create_delete_instance, create_shopping_list
+from recipes.models import Favorites, Ingredient, Recipe, ShoppingCart, Tag
 
 User = get_user_model()
 
@@ -90,19 +89,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[permissions.IsAuthenticated])
     def download_shopping_cart(self, request):
         """Скачивание списка покупок."""
-        ingredients = RecipeIngredient.objects.filter(
-            recipe__shoppingcart__user=request.user).values(
-            'ingredients__name',
-            'ingredients__measurement_unit').annotate(
-                total_amount=Sum('amount'))
-        shop_list = ['Список покупок:\n']
-        shop_list += ['наименование - количество - единицы измерения\n']
-        for ingredient in ingredients:
-            shop_list.append(
-                f'{ingredient["ingredients__name"]}'
-                f'          {ingredient["total_amount"]} '
-                f'           {ingredient["ingredients__measurement_unit"]}\n'
-            )
+        shop_list = create_shopping_list(request)
 
         response = HttpResponse(shop_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = (

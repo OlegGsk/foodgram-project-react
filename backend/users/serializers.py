@@ -68,16 +68,5 @@ class FollowPostSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('user', 'author')
 
-    def validate(self, data):
-        user = self.context['request'].user
-        request = self.context['request']
-        author = self.context['author']
-
-        if request.method == 'DELETE' and not Follow.objects.filter(
-                user=user, author=author).exists():
-            raise serializers.ValidationError(
-                'Вы не подписаны на этого пользователя')
-        return data
-
     def to_representation(self, instance):
         return FollowGetSerializer(instance.author, context=self.context).data

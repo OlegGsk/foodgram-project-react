@@ -55,6 +55,10 @@ class FollowingViewSet(UserViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
+            if not Follow.objects.filter(user=self.request.user,
+                                         author=author).exists():
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data='Такой подписки не существует')
             serializer.is_valid(raise_exception=True)
             Follow.objects.filter(user=self.request.user,
                                   author=author).delete()

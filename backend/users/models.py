@@ -40,11 +40,9 @@ class Follow(models.Model):
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),
                 name='prevent_self_follow',
-                violation_error_message='Нельзя подписаться на себя.'
             ),
             models.UniqueConstraint(
                 fields=['user', 'author'], name='unique_follow',
-                violation_error_message='Такая подписка уже существует.'
             )]
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'

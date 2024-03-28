@@ -1,5 +1,5 @@
 import base64
-
+from django.db.models import Sum
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
@@ -67,3 +67,25 @@ def create_update_tags(tags, instance):
     """Создание или обновление тегов рецепта."""
     for tag in tags:
         RecipeTag.objects.create(recipe=instance, tag=tag)
+
+
+def create_shopping_list(request):
+    """Создание списка покупок."""
+    ingredients = RecipeIngredient.objects.filter(
+        recipe__shoppingcart__user=request.user).values(
+        'ingredients__name',
+        'ingredients__measurement_unit').annotate(
+            total_amount=Sum('amount'))
+
+    shop_list = ['Список покупок:\n']
+    shop_list += ['наименование' + 23 * ' ' + 'количество'
+                  '        единицы измерения\n']
+    for ingredient in ingredients:
+        len_1 = ' ' * (35 - len(ingredient['ingredients__name']))
+        len_2 = (53 - (len(len_1) + len(ingredient["ingredients__name"])
+                 + len(str(ingredient['total_amount'])))) * ' '
+        shop_list.append(
+            f'{ingredient["ingredients__name"]}'
+            f'{len_1}{ingredient["total_amount"]}'
+            f'{len_2}{ingredient["ingredients__measurement_unit"]}\n')
+    return shop_list

@@ -35,7 +35,7 @@ services:
       proxy_nginx: "Для SSL"
     ports:
       - 80:80
-      - 443:443
+      - 443:443 # Не лишний порт, нужен для SSL-сертификата
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
