@@ -7,9 +7,9 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', False) == 'True'
 
-DEBUG = False
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(', ')
@@ -62,7 +62,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'foodgram.wsgi.application'
-
 
 DATABASES = {
     'default': {
