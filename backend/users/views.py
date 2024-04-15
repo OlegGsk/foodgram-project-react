@@ -24,7 +24,7 @@ class FollowingViewSet(UserViewSet):
             permission_classes=[permissions.IsAuthenticated],
             )
     def subscriptions(self, request):
-        user = self.request.user
+        user = request.user
         queryset = User.objects.filter(following__user=user)
         page = self.paginate_queryset(queryset)
         serializer = self.get_serializer(page, many=True,
@@ -42,9 +42,8 @@ class FollowingViewSet(UserViewSet):
                             data='Пользователь не найден')
 
         author = get_object_or_404(User, id=id)
-        serializer = self.get_serializer(data=request.data,
-                                         context={'request': request,
-                                                  'author': author})
+        serializer = self.get_serializer(data=request.data)
+
         if request.method == 'POST':
             try:
                 serializer.is_valid(raise_exception=True)
@@ -59,7 +58,7 @@ class FollowingViewSet(UserViewSet):
                                          author=author).exists():
                 return Response(status=status.HTTP_400_BAD_REQUEST,
                                 data='Такой подписки не существует')
-            serializer.is_valid(raise_exception=True)
+            # serializer.is_valid(raise_exception=True)
             Follow.objects.filter(user=self.request.user,
                                   author=author).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)

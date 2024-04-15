@@ -57,11 +57,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Recipe.objects.annotate(
             is_favorited=Exists(
                 Subquery(Favorites.objects.filter(
-                    user_id=OuterRef('author_id'),
+                    user=OuterRef('author'),
                     recipe_id=OuterRef('pk')))),
             is_in_shopping_cart=Exists(
                 Subquery(ShoppingCart.objects.filter(
-                    user=OuterRef('author_id'),
+                    user=OuterRef('author'),
                     recipe_id=OuterRef('pk')
                 )))).select_related('author'
                                     ).prefetch_related('tags',

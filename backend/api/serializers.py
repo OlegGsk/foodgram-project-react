@@ -68,13 +68,16 @@ class RecipeSerializer(serializers.ModelSerializer):
             id = ingredient.get('ingredients').get('id')
             amount = ingredient.get('amount')
             ingredients_id_list.append(id)
-            if not Ingredient.objects.filter(id=id).exists():
-                raise serializers.ValidationError(
-                    f'Ингредиента с id {id} нет в базе данных!!')
+            # if not Ingredient.objects.filter(id=id).exists():
+            #     raise serializers.ValidationError(
+            #         f'Ингредиента с id {id} нет в базе данных!!')
 
             if amount <= 0:
                 raise serializers.ValidationError(
                     'Количество ингредиента должно быть больше нуля')
+        if not Ingredient.objects.filter(id__in=ingredients_id_list).exists():
+            raise serializers.ValidationError(
+                'Ингредиента нет в базе данных!!')
 
         if len(ingredients_id_list) != len(set(ingredients_id_list)):
             raise serializers.ValidationError(
